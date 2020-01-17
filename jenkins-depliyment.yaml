@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-deployment
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: jenkinsci/blueocean:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - mountPath: /var/jenkins_home
+          name: jenkins-volume
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
+      volumes:
+      - name: jenkins-volume
+        # This AWS EBS volume must already exist.
+        awsElasticBlockStore:
+          volumeID: vol-010c9b943c41f89e2
+          fsType: ext4
+      - name: docker-sock
+        hostPath: 
+          path: /var/run/docker.sock
+          type: Socket

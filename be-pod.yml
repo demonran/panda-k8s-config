@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: panda-be
+spec:
+  containers:
+    - name: panda-be
+      image: 955095959256.dkr.ecr.cn-northwest-1.amazonaws.com.cn/panda-be
+      args:
+      - env
+      resources:
+        requests:
+          memory: "512Mi"
+          cpu: "125m"
+        limits:
+          memory: "1024Mi"
+          cpu: "250m"
