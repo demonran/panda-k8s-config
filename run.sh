@@ -15,7 +15,8 @@ if [ "$1" = "start" ];then
 		    --target-group-arn arn:aws-cn:elasticloadbalancing:cn-northwest-1:955095959256:targetgroup/panda-sonar/b767b8e2727d260d \
 		    --targets Id=$sonar_ip,Port=9000
 	#start k8s
-	cd kops-cn-master
+	cd ../kops-cn-master
+	cp -r ../panda-k8s-config/一键启停/Makefile .
 	make create-cluster
 
 	#make edit-cluster
@@ -26,6 +27,9 @@ if [ "$1" = "start" ];then
 	sed -i '' '/spec/r temp-spec.yml' temp-cluster.yml
 	kops replace -f temp-cluster.yml --state s3://cluster.k8s.local.panda
 	make update-cluster
+
+	# add policy
+	aws iam attach-role-policy --role-name nodes.cluster.panda.k8s.local --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
 
 	#add listener on k8s cluster 9000
 	load_balancer_name=$(aws elb describe-load-balancers --profile panda_beach --query 'LoadBalancerDescriptions[?contains(LoadBalancerName,`cluster-panda-k8s`)].LoadBalancerName | [0]')
@@ -41,7 +45,7 @@ if [ "$1" = "start" ];then
 	# export KUBECONFIG=~/Work/panda-beach/kube-config/config
 
 
-	kubectl apply -f ./panda-k8s-config/jenkins-depliyment.yaml
+	kubectl apply -f ../panda-k8s-config/jenkins-depliyment.yaml
 	kubectl apply -f ./panda-k8s-config/jenkins-service.yaml
 
 	jenkins_dns=$(kubectl get svc | grep jenkins | awk '{ print $4 }')
@@ -74,7 +78,7 @@ elif [ "$1" = "stop" ];then
 		    --target-group-arn arn:aws-cn:elasticloadbalancing:cn-northwest-1:955095959256:targetgroup/panda-sonar/b767b8e2727d260d \
 		    --targets Id=$old_sonar_ip,Port=9000
 	#stop k8s
-	cd kops-cn-master
+	cd ../kops-cn-master
 	make delete-cluster
 else
 	echo "error arg"
