@@ -6,8 +6,12 @@ metadata:
     app: jenknis
 spec:
   ports:
-  - port: 8000
+  - name: http
+    port: 8000
     targetPort: 8080
+  - name: slave
+    port: 50000
+    targetPort: 50000
   selector:
     app: jenkins
   type: LoadBalancer
